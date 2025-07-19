@@ -1,82 +1,25 @@
-// api/contact.js
-export default async function handler(req, res) {
-  // Permettre les requêtes CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+const axios = require('axios');
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
+module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Méthode non autorisée' });
+    return res.status(405).json({ message: 'Method not allowed' });
   }
+
+  const { name, email, subject, message } = req.body;
+
+  const telegramMessage = `Nouveau message de ${name} (${email}):\nSujet: ${subject}\nMessage: ${message}`;
+
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
 
   try {
-    const { name, email, subject, message } = req.body;
-
-    // Validation des données
-    if (!name || !email || !subject || !message) {
-      return res.status(400).json({ error: 'Tous les champs sont requis' });
-    }
-
-    // Validation email basique
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'Email invalide' });
-    }
-
-    // Formatage du message pour Telegram
-    const telegramMessage = `🔔 *Nouveau message de contact*
-
-👤 *Nom:* ${name}
-📧 *Email:* ${email}
-📝 *Sujet:* ${subject}
-
-💬 *Message:*
-${message}
-
-📅 *Date:* ${new Date().toLocaleString('fr-FR')}`;
-
-    // Vérification des variables d'environnement
-    if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
-      console.error('Variables d\'environnement manquantes');
-      return res.status(500).json({ error: 'Configuration serveur manquante' });
-    }
-
-    // Envoi vers Telegram
-    const telegramResponse = await fetch(
-      `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: process.env.TELEGRAM_CHAT_ID,
-          text: telegramMessage,
-          parse_mode: 'Markdown', // Pour le formatage
-        }),
-      }
-    );
-
-    if (!telegramResponse.ok) {
-      const errorData = await telegramResponse.json();
-      console.error('Erreur Telegram:', errorData);
-      return res.status(500).json({ error: 'Erreur lors de l\'envoi vers Telegram' });
-    }
-
-    // Succès
-    return res.status(200).json({ 
-      success: true, 
-      message: 'Message envoyé avec succès' 
+    await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      chat_id: chatId,
+      text: telegramMessage
     });
 
+    res.status(200).json({ message: 'Message envoyé à Telegram' });
   } catch (error) {
-    console.error('Erreur API:', error);
-    return res.status(500).json({ error: 'Erreur interne du serveur' });
+    res.status(500).json({ error: 'Erreur lors de l\'envoi du message à Telegram' });
   }
-}
+};

@@ -181,76 +181,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 300);
 });
 
- 
-        document.getElementById('contact-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            
-            const submitBtn = document.getElementById('submit-btn');
-            const originalContent = submitBtn.innerHTML;
-            
-            // Afficher notification de chargement
-            showNotification('Envoi en cours...', 'loading');
-            
-            // Désactiver le bouton pendant l'envoi
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `
-                <div class="flex items-center justify-center gap-2">
-                    <div class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span class="bg-gradient-to-r from-cyan-300 to-indigo-300 bg-clip-text text-transparent">Envoi...</span>
-                </div>
-            `;
-            
-            // Récupérer les données du formulaire
-            const formData = {
-                name: document.getElementById('name').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                subject: document.getElementById('subject').value.trim(),
-                message: document.getElementById('message').value.trim()
-            };
-            
-            try {
-                // Validation côté client
-                if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-                    throw new Error('Tous les champs sont requis');
-                }
-                
-                // Envoyer vers l'API Vercel
-                const response = await fetch('/api/contact', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showNotification('✅ Message envoyé avec succès !', 'success');
-                    document.getElementById('contact-form').reset();
-                } else {
-                    throw new Error(result.error || 'Erreur lors de l\'envoi');
-                }
-            } catch (error) {
-                console.error('Erreur:', error);
-                showNotification(`❌ ${error.message}`, 'error');
-            } finally {
-                // Réactiver le bouton
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalContent;
-            }
+document.getElementById('contact-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const formData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        subject: document.getElementById('subject').value,
+        message: document.getElementById('message').value
+    };
+
+    try {
+        const response = await fetch('/api/send-message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
         });
 
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.classList.add('show');
-            
-            const duration = type === 'success' ? 5000 : (type === 'error' ? 7000 : 3000);
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, duration);
-        }
-    
+        const data = await response.json();
+        console.log(data);
+        alert('Message envoyé à Telegram');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Erreur lors de l\'envoi du message à Telegram');
+    }
+});
