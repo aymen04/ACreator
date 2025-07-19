@@ -14,25 +14,81 @@ document.addEventListener('DOMContentLoaded', () => {
   const sections = document.querySelectorAll('section');
   const bgElements = document.querySelectorAll('.fixed > div');
 
-  // Mobile Menu Toggle
-  mobileMenuButton.addEventListener('click', () => {
-    mobileMenuButton.classList.toggle('active');
-    
-    if (mobileMenu.classList.contains('open')) {
-      mobileMenu.style.height = '0';
-      mobileMenu.classList.remove('open');
-    } else {
-      mobileMenu.classList.add('open');
-      mobileMenu.style.height = `${mobileMenu.scrollHeight}px`;
-    }
-  });
+  // Debug - vérifier si les éléments existent
+  console.log('Mobile menu button:', mobileMenuButton);
+  console.log('Mobile menu:', mobileMenu);
 
-  // Close mobile menu when a link is clicked
+  // Mobile Menu Toggle - VERSION CORRIGÉE
+  if (mobileMenuButton && mobileMenu) {
+    mobileMenuButton.addEventListener('click', () => {
+      console.log('Menu button clicked!'); // Debug
+      
+      const line1 = document.getElementById('line1');
+      const line2 = document.getElementById('line2'); 
+      const line3 = document.getElementById('line3');
+      
+      // Toggle active class
+      mobileMenuButton.classList.toggle('active');
+      
+      // Animation des lignes du hamburger
+      if (mobileMenuButton.classList.contains('active')) {
+        if (line1) line1.style.transform = 'rotate(45deg) translate(2px, 2px)';
+        if (line2) line2.style.opacity = '0';
+        if (line3) line3.style.transform = 'rotate(-45deg) translate(2px, -2px)';
+      } else {
+        if (line1) line1.style.transform = 'rotate(0) translate(0, 0)';
+        if (line2) line2.style.opacity = '1';
+        if (line3) line3.style.transform = 'rotate(0) translate(0, 0)';
+      }
+      
+      // Toggle du menu mobile - SOLUTION FORCÉE
+      if (mobileMenu.classList.contains('open')) {
+        // Fermer le menu
+        mobileMenu.classList.remove('open');
+        mobileMenu.style.height = '0px';
+        mobileMenu.style.opacity = '0';
+        mobileMenu.style.visibility = 'hidden';
+        console.log('Menu fermé');
+      } else {
+        // Ouvrir le menu
+        mobileMenu.classList.add('open');
+        mobileMenu.style.height = 'auto';
+        mobileMenu.style.opacity = '1';
+        mobileMenu.style.visibility = 'visible';
+        mobileMenu.style.display = 'block';
+        
+        // Calculer la hauteur réelle
+        const realHeight = mobileMenu.scrollHeight;
+        mobileMenu.style.height = '0px';
+        setTimeout(() => {
+          mobileMenu.style.height = realHeight + 'px';
+        }, 10);
+        
+        console.log('Menu ouvert, hauteur:', realHeight);
+      }
+    });
+  }
+
+  // Close mobile menu when a link is clicked - VERSION CORRIGÉE
   mobileNavLinks.forEach(link => {
     link.addEventListener('click', () => {
+      console.log('Mobile nav link clicked!'); // Debug
+      
+      const line1 = document.getElementById('line1');
+      const line2 = document.getElementById('line2');
+      const line3 = document.getElementById('line3');
+      
+      // Reset hamburger
       mobileMenuButton.classList.remove('active');
-      mobileMenu.style.height = '0';
+      if (line1) line1.style.transform = 'rotate(0) translate(0, 0)';
+      if (line2) line2.style.opacity = '1'; 
+      if (line3) line3.style.transform = 'rotate(0) translate(0, 0)';
+      
+      // Fermer le menu
       mobileMenu.classList.remove('open');
+      mobileMenu.style.height = '0px';
+      mobileMenu.style.opacity = '0';
+      mobileMenu.style.visibility = 'hidden';
     });
   });
 
@@ -97,24 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  // Parallax effect for background elements
-  /*
-  if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-    document.addEventListener('mousemove', (e) => {
-      const x = e.clientX / window.innerWidth;
-      const y = e.clientY / window.innerHeight;
-      
-      bgElements.forEach(element => {
-        const speed = 20; // Adjust for more or less movement
-        const xOffset = (x - 0.5) * speed;
-        const yOffset = (y - 0.5) * speed;
-        
-        element.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
-      });
-    });
-  }
-  */
 
   // Scroll animations for sections
   const observer = new IntersectionObserver((entries) => {

@@ -529,3 +529,56 @@ a:focus, button:focus {
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, #06b6d4, #6366f1);
 }
+/* CSS pour Menu Mobile - À ajouter à votre style.css */
+
+/* Menu mobile - états et transitions */
+#mobile-menu {
+  transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  overflow: hidden;
+  height: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+#mobile-menu.open {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Animation des lignes du hamburger */
+#mobile-menu-button.active #line1 {
+  transform: rotate(45deg) translate(2px, 2px) !important;
+}
+
+#mobile-menu-button.active #line2 {
+  opacity: 0 !important;
+}
+
+#mobile-menu-button.active #line3 {
+  transform: rotate(-45deg) translate(2px, -2px) !important;
+}
+
+/* Force l'affichage du menu en mobile */
+@media (max-width: 768px) {
+  #mobile-menu {
+    display: block !important;
+  }
+  
+  /* Assurer que le menu mobile est au-dessus de tout */
+  #mobile-menu.open {
+    z-index: 999;
+    position: relative;
+  }
+  
+  /* Style pour les liens du menu mobile */
+  .mobile-nav-link {
+    display: block !important;
+    width: 100%;
+  }
+}
+
+/* Animation supplémentaire pour les lignes */
+#line1, #line2, #line3 {
+  transition: all 0.3s ease-in-out;
+  transform-origin: center;
+}
